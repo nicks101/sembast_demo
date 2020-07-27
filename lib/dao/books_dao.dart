@@ -2,40 +2,36 @@ import 'package:sembast/sembast.dart';
 import 'package:sembast_demo/db/data_base.dart';
 import 'package:sembast_demo/model/books_model.dart';
 
+class BookDao {
+  static const String folderName = "book";
+  final _bookFolder = intMapStoreFactory.store(folderName);
 
+  Future<Database> get _db async => await AppDatabase.instance.database;
 
-class BooksDao{
-  static const String folderName = "Books";
-  final _booksFolder = intMapStoreFactory.store(folderName);
-
-
-  Future<Database> get  _db  async => await AppDatabase.instance.database;
-
-  Future insertBooks(Books books) async{
-
-    await  _booksFolder.add(await _db, books.toJson() );
-
+  Future insertbook(Book book) async {
+    await _bookFolder.add(await _db, book.toJson());
   }
 
-  Future updateBooks(Books books) async{
-    final finder = Finder(filter: Filter.byKey(books.rollNo));
-    await _booksFolder.update(await _db, books.toJson(),finder: finder);
-
+  Future<Book> updatebook(Book book) async {
+    final finder = Finder(filter: Filter.byKey(book.rollNo));
+    // await _bookFolder.update(await _db, book.toJson(), finder: finder);
+    var result =
+        await _bookFolder.record(book.rollNo).put(await _db, book.toJson());
+    print(result);
+    print(book.authors.length);
+    return book;
   }
 
-
-  Future delete(Books books) async{
-    final finder = Finder(filter: Filter.byKey(books.rollNo));
-    await _booksFolder.delete(await _db, finder: finder);
+  Future delete(Book book) async {
+    final finder = Finder(filter: Filter.byKey(book.rollNo));
+    await _bookFolder.delete(await _db, finder: finder);
   }
 
-  Future<List<Books>> getAllBooks()async{
-    final recordSnapshot = await _booksFolder.find(await _db);
-    return recordSnapshot.map((snapshot){
-      final books = Books.fromJson(snapshot.value);
-      return books;
+  Future<List<Book>> getAllbook() async {
+    final recordSnapshot = await _bookFolder.find(await _db);
+    return recordSnapshot.map((snapshot) {
+      final book = Book.fromJson(snapshot.value);
+      return book;
     }).toList();
   }
-
-
 }
